@@ -24,7 +24,7 @@ deriveDBInstances ∷ Model → Q [Dec]
 deriveDBInstances Model { modelName, fields } = do
 
     let fieldInstances ∷ Q [Dec]
-        fieldInstances = foldQ $ fmap (\(_, upperField, typeName) -> do
+        fieldInstances = foldQ $ fmap (\Field {upperField = upperField, typeName = typeName} -> do
             -- let modelName' = mkName modelName
             let fieldName = mkName $ modelName <> upperField
             -- InstanceD Nothing [] ConT typeName []
