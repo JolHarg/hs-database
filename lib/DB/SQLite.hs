@@ -58,22 +58,22 @@ getOneByIdSoftDeletedExclusive conn' table deletedAtField = getOneByFieldSoftDel
 getOneByIdSoftDeletedInclusive ∷ (FromRow row, ToField id, MonadIO m) ⇒ Connection → TableName → id → m (Maybe row)
 getOneByIdSoftDeletedInclusive conn' table = getOneByFieldSoftDeletedInclusive conn' table "id"
 
-getOneByFieldSoftDeletedExclusive ∷ (FromRow row, ToField field, MonadIO m) ⇒ Connection → TableName → Text → Text → field → m (Maybe row)
+getOneByFieldSoftDeletedExclusive ∷ (FromRow row, ToField value, MonadIO m) ⇒ Connection → TableName → Text → Text → value → m (Maybe row)
 getOneByFieldSoftDeletedExclusive conn' table deletedAtField field' value' = listToMaybe <$> liftIO (
     query conn' (SQLite.Query $ "SELECT * from " <> table <> " WHERE " <> field' <> " = ? AND " <> deletedAtField <> " IS NULL LIMIT 1") (Only value'))
 
-getOneByFieldSoftDeletedInclusive ∷ (FromRow row, ToField field, MonadIO m) ⇒ Connection → TableName → Text → field → m (Maybe row)
+getOneByFieldSoftDeletedInclusive ∷ (FromRow row, ToField value, MonadIO m) ⇒ Connection → TableName → Text → value → m (Maybe row)
 getOneByFieldSoftDeletedInclusive conn' table field' value' = listToMaybe <$> liftIO (
     query conn' (SQLite.Query $ "SELECT * from " <> table <> " WHERE " <> field' <> " = ? LIMIT 1") (Only value'))
 
-getOneByFieldsSoftDeletedExclusive ∷ (FromRow row, ToField field, MonadIO m) ⇒ Connection → TableName → Text → Map Text field → m (Maybe row)
+getOneByFieldsSoftDeletedExclusive ∷ (FromRow row, ToField value, MonadIO m) ⇒ Connection → TableName → Text → Map Text value → m (Maybe row)
 getOneByFieldsSoftDeletedExclusive conn' table deletedAtField  fields' = listToMaybe <$> (liftIO . query conn' (
         SQLite.Query $ "SELECT * from " <> table <> " WHERE " <> T.intercalate " AND " (
             (<> " = ?") <$> M.keys fields'
         ) <> " AND " <> deletedAtField <> " IS NULL LIMIT 1"
     ) $ M.elems fields')
 
-getOneByFieldsSoftDeletedInclusive ∷ (ToField field, FromRow row, MonadIO m) ⇒ Connection → TableName → Map Text field → m (Maybe row)
+getOneByFieldsSoftDeletedInclusive ∷ (ToField value, FromRow row, MonadIO m) ⇒ Connection → TableName → Map Text value → m (Maybe row)
 getOneByFieldsSoftDeletedInclusive conn' table fields' = listToMaybe <$> (liftIO . query conn' (
         SQLite.Query $ "SELECT * from " <> table <> " WHERE " <> T.intercalate " AND " (
             (<> " = ?") <$> M.keys fields'
@@ -86,22 +86,22 @@ getAllSoftDeletedExclusive conn' table deletedAtField = liftIO $ query_ conn' (S
 getAllSoftDeletedInclusive ∷ (FromRow row, MonadIO m) ⇒ Connection → TableName → m [row]
 getAllSoftDeletedInclusive conn' table = liftIO $ query_ conn' (SQLite.Query $ "SELECT * from " <> table)
 
-getAllByFieldSoftDeletedExclusive ∷ (FromRow row, ToField field, MonadIO m) ⇒ Connection → TableName → Text → Text → field → m [row]
+getAllByFieldSoftDeletedExclusive ∷ (FromRow row, ToField value, MonadIO m) ⇒ Connection → TableName → Text → Text → value → m [row]
 getAllByFieldSoftDeletedExclusive conn' table deletedAtField field' value' =
     liftIO $ query conn' (SQLite.Query $ "SELECT * from " <> table <> " WHERE " <> field' <> " = ? AND " <> deletedAtField <> " IS NULL") (Only value')
 
-getAllByFieldSoftDeletedInclusive ∷ (FromRow row, ToField field, MonadIO m) ⇒ Connection → TableName → Text → field → m [row]
+getAllByFieldSoftDeletedInclusive ∷ (FromRow row, ToField value, MonadIO m) ⇒ Connection → TableName → Text → value → m [row]
 getAllByFieldSoftDeletedInclusive conn' table field' value' =
     liftIO $ query conn' (SQLite.Query $ "SELECT * from " <> table <> " WHERE " <> field' <> " = ?") (Only value')
 
-getAllByFieldsSoftDeletedExclusive ∷ (FromRow row, ToField field, MonadIO m) ⇒ Connection → TableName → Text → Map Text field → m [row]
+getAllByFieldsSoftDeletedExclusive ∷ (FromRow row, ToField value, MonadIO m) ⇒ Connection → TableName → Text → Map Text value → m [row]
 getAllByFieldsSoftDeletedExclusive conn' table deletedAtField fields' = liftIO . query conn' (
     SQLite.Query $ "SELECT * from " <> table <> " WHERE " <> T.intercalate " AND " (
             (<> " = ?") <$> M.keys fields'
         ) <> " AND " <> deletedAtField <> " IS NULL"
     ) $ M.elems fields'
 
-getAllByFieldsSoftDeletedInclusive ∷ (FromRow row, ToField field, MonadIO m) ⇒ Connection → TableName → Map Text field → m [row]
+getAllByFieldsSoftDeletedInclusive ∷ (FromRow row, ToField value, MonadIO m) ⇒ Connection → TableName → Map Text value → m [row]
 getAllByFieldsSoftDeletedInclusive conn' table fields' = liftIO . query conn' (
     SQLite.Query $ "SELECT * from " <> table <> " WHERE " <> T.intercalate " AND " (
             (<> " = ?") <$> M.keys fields'
@@ -145,8 +145,8 @@ insertMany conn' table = mapM_ (insertOne conn' table)
 
 -- TODO ignore ID?
 -- update all by field, update all by fields
-updateOneByIdSoftDeleteInclusive ∷ forall row m. (FromRow row, ToRow row, Data row, MonadIO m) ⇒ Connection → TableName → Text → row → m ()
-updateOneByIdSoftDeleteInclusive conn' table deletedAtField row = void $ liftIO (
+updateOneByIdSoftDeleteExclusive ∷ forall row m. (FromRow row, ToRow row, Data row, MonadIO m) ⇒ Connection → TableName → Text → row → m ()
+updateOneByIdSoftDeleteExclusive conn' table deletedAtField row = void $ liftIO (
     query conn' (
         SQLite.Query $
             "UPDATE " <>
@@ -158,8 +158,8 @@ updateOneByIdSoftDeleteInclusive conn' table deletedAtField row = void $ liftIO 
         )
         ((tail . toRow $ row) <> [head . toRow $ row]) :: IO [row])
 
-updateOneByIdSoftDeleteExclusive ∷ forall row m. (FromRow row, ToRow row, Data row, MonadIO m) ⇒ Connection → TableName → row → m ()
-updateOneByIdSoftDeleteExclusive conn' table row = void $ liftIO (
+updateOneByIdSoftDeleteInclusive ∷ forall row m. (FromRow row, ToRow row, Data row, MonadIO m) ⇒ Connection → TableName → row → m ()
+updateOneByIdSoftDeleteInclusive conn' table row = void $ liftIO (
     query conn' (
         SQLite.Query $
             "UPDATE " <>
