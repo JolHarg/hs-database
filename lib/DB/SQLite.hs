@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedLists   #-}
+{-# LANGUAGE OverloadedLists     #-}
 {-# LANGUAGE OverloadedStrings   #-}
 {-# LANGUAGE RankNTypes          #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -40,7 +40,7 @@ data Query = Query {
     queryFields :: QueryFields,
     returnFields :: ReturnFields,
     insertFields :: InsertFields,
-    softDeleteOption :: SoftDeleteOption 
+    softDeleteOption :: SoftDeleteOption
 }
 
 executeQuery :: MonadIO m => DB.SQLite.Query a → m a
