@@ -6,15 +6,15 @@
 
 module DB.SQLite where
 
-import           Control.Monad                  (void)
-import           Control.Monad.IO.Class         (MonadIO (liftIO))
-import           Data.Data
-import qualified Data.Map                       as M
-import           Data.Map.Strict                (Map)
-import           Data.Maybe
-import           Data.Text                      as T (Text, intercalate, pack)
-import           Database.SQLite.Simple         as SQLite
-import           Database.SQLite.Simple.ToField
+import Control.Monad                  (void)
+import Control.Monad.IO.Class         (MonadIO (liftIO))
+import Data.Data
+import Data.Map qualified as M
+import Data.Map.Strict                (Map)
+import Data.Maybe
+import Data.Text                      as T (Text, intercalate, pack)
+import Database.SQLite.Simple         as SQLite
+import Database.SQLite.Simple.ToField
 
 type TableName = Text
 
