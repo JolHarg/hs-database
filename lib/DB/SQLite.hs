@@ -3,7 +3,6 @@
 {-# LANGUAGE RankNTypes          #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
-
 module DB.SQLite where
 
 import Control.Monad                  (void)
