@@ -6,13 +6,13 @@
 
 module DB.Instances.TH where
 
-import           Data.Model
-import           Data.Model.TH
-import           Database.SQLite.Simple
-import           Database.SQLite.Simple.FromField
-import           Database.SQLite.Simple.ToField
-import           Language.Haskell.TH
-import           Language.Haskell.TH.Syntax
+import Data.Model
+import Data.Model.TH
+import Database.SQLite.Simple
+import Database.SQLite.Simple.FromField
+import Database.SQLite.Simple.ToField
+import Language.Haskell.TH
+import Language.Haskell.TH.Syntax
 
 foldQ ∷ [Q [a]] → Q [a]
 foldQ = fmap concat . sequenceQ
