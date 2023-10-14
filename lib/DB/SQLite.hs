@@ -8,7 +8,7 @@ module DB.SQLite where
 import Control.Monad                  (void)
 import Control.Monad.IO.Class         (MonadIO (liftIO))
 import Data.Data
-import Data.Map qualified as M
+import Data.Map                       qualified as M
 import Data.Map.Strict                (Map)
 import Data.Maybe
 import Data.Text                      as T (Text, intercalate, pack)
@@ -207,17 +207,17 @@ hardDeleteAllByFields conn' table fields' = liftIO .
 
 softDeleteById ∷ (ToField id, MonadIO m) ⇒ Connection → TableName → Text → id → m ()
 softDeleteById conn' table deletedAtField id' = liftIO $
-    execute conn' (SQLite.Query $ "UPDATE " <> table <> " SET " <> deletedAtField  <> " = NOW() WHERE id = ?") (Only id')
+    execute conn' (SQLite.Query $ "UPDATE " <> table <> " SET " <> deletedAtField  <> " = DATETIME('NOW') WHERE id = ?") (Only id')
 {-# INLINABLE softDeleteById #-}
 
 softDeleteAllByField ∷ (ToField value, MonadIO m) ⇒ Connection → TableName → Text → Text → value → m ()
 softDeleteAllByField conn' table deletedAtField field' value' = liftIO $
-    execute conn' (SQLite.Query $ "UPDATE " <> table <> " SET " <> deletedAtField <> " = NOW() WHERE " <> field' <> " = ?") (Only value')
+    execute conn' (SQLite.Query $ "UPDATE " <> table <> " SET " <> deletedAtField <> " = DATETIME('NOW') WHERE " <> field' <> " = ?") (Only value')
 {-# INLINABLE softDeleteAllByField #-}
 
 softDeleteAllByFields ∷ (ToField value, MonadIO m) ⇒ Connection → TableName → Text → Map Text value → m ()
 softDeleteAllByFields conn' table deletedAtField fields' =  liftIO $
-    execute conn' (SQLite.Query $ "UPDATE " <> table <> " SET " <> deletedAtField <> " = NOW() WHERE " <> T.intercalate " AND " (
+    execute conn' (SQLite.Query $ "UPDATE " <> table <> " SET " <> deletedAtField <> " = DATETIME('NOW') WHERE " <> T.intercalate " AND " (
                 (<> " = ?") <$> M.keys fields'
             )
         ) (M.elems fields')
