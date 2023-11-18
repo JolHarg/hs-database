@@ -139,7 +139,7 @@ insertOne conn' table row = void . liftIO $
             table <>
             " (" <>
             T.intercalate "," (
-                getFields row
+                ("`" <>) . (<> "`") <$> getFields row
             )
             <> ") values (" <>
             T.intercalate "," (
