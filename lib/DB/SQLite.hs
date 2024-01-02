@@ -5,12 +5,11 @@
 
 module DB.SQLite where
 
-import Control.Monad                  (void)
 import Control.Monad.IO.Class         (MonadIO (liftIO))
 import Data.Data
 import Data.Map                       qualified as M
 import Data.Map.Strict                (Map)
-import Data.Maybe
+import Data.Maybe                     (listToMaybe)
 import Data.Text                      as T (Text, intercalate, pack)
 import Database.SQLite.Simple         as SQLite
 import Database.SQLite.Simple.ToField
@@ -131,8 +130,8 @@ getAllByFieldsSoftDeletedInclusive conn' table fields' = liftIO . query conn' (
 
 -- todo upsert?
 
-insertOne ∷ forall row m. (FromRow row, ToRow row, Data row, MonadIO m) ⇒ Connection → TableName → row → m ()
-insertOne conn' table row = void . liftIO $
+insertOne ∷ forall m row returnedRow. (Data row, ToRow row, FromRow returnedRow, MonadIO m) ⇒ Connection → TableName → TableName -> row → m returnedRow
+insertOne conn' table toTable row = fmap head <$> liftIO $
     (query conn' (
         SQLite.Query $
             "INSERT INTO " <>
@@ -146,12 +145,12 @@ insertOne conn' table row = void . liftIO $
                 -- Currently, the table columns have to be in the same order as the rows in the datatype.
                 "?" <$ getFields row
             ) <>
-            ")"
-        ) $ toRow row :: IO [row])
+            "); SELECT * FROM `" <> toTable <> "` WHERE id = LAST_INSERT_ROWID() LIMIT 1;"
+        ) $ toRow row :: IO [returnedRow])
 {-# INLINABLE insertOne #-}
 
-insertMany ∷ (FromRow row, ToRow row, Data row, MonadIO m) ⇒ Connection → TableName → [row] → m ()
-insertMany conn' table = mapM_ (insertOne conn' table)
+insertMany ∷ (ToRow row, Data row, FromRow returnedRow, MonadIO m) ⇒ Connection → TableName → TableName -> [row] → m [returnedRow]
+insertMany conn' table toTable = mapM (insertOne conn' table toTable)
 {-# INLINABLE insertMany #-}
 
 -- @TODO If soft deleted - when updating appendthe unique keys with "_SOFT_DELETED_TIMESTAMP_" ?
@@ -161,32 +160,32 @@ insertMany conn' table = mapM_ (insertOne conn' table)
 -- TODO ignore ID?
 -- update all by field, update all by fields
 
-updateOneByIdSoftDeleteExclusive ∷ forall row m. (FromRow row, ToRow row, Data row, MonadIO m) ⇒ Connection → TableName → Text → row → m ()
-updateOneByIdSoftDeleteExclusive conn' table deletedAtField row = void $ liftIO (
+updateOneByIdSoftDeleteExclusive ∷ forall m row returnedRow. (FromRow returnedRow, ToRow row, Data row, MonadIO m) ⇒ Connection → TableName → TableName -> Text → row → m (Maybe returnedRow)
+updateOneByIdSoftDeleteExclusive conn' table toTable deletedAtField row = listToMaybe <$> liftIO (
     query conn' (
         SQLite.Query $
             "UPDATE " <>
             table <>
             " SET " <>
             T.intercalate "," (
-                (<> " = ?") <$> tail (getFields row)
-            ) <> " WHERE id = ? AND " <> deletedAtField <> " IS NULL"
+                (<> " = ?") <$> tail (getFields row) -- everything but id
+            ) <> " WHERE id = ? AND " <> deletedAtField <> " IS NULL; SELECT * FROM " <> toTable <> " WHERE id = ? LIMIT 1;"
         )
-        ((tail . toRow $ row) <> [head . toRow $ row]) :: IO [row])
+        ((tail . toRow $ row) <> [head (toRow row), head (toRow row)]) :: IO [returnedRow])
 {-# INLINABLE updateOneByIdSoftDeleteExclusive #-}
 
-updateOneByIdSoftDeleteInclusive ∷ forall row m. (FromRow row, ToRow row, Data row, MonadIO m) ⇒ Connection → TableName → row → m ()
-updateOneByIdSoftDeleteInclusive conn' table row = void $ liftIO (
+updateOneByIdSoftDeleteInclusive ∷ forall m row returnedRow. (FromRow returnedRow, ToRow row, Data row, MonadIO m) ⇒ Connection → TableName → TableName -> row → m (Maybe returnedRow)
+updateOneByIdSoftDeleteInclusive conn' table toTable row = listToMaybe <$> liftIO (
     query conn' (
         SQLite.Query $
             "UPDATE " <>
             table <>
             " SET " <>
             T.intercalate "," (
-                (<> " = ?") <$> tail (getFields row)
-            ) <> " WHERE id = ?"
+                (<> " = ?") <$> tail (getFields row) -- everything but id
+            ) <> " WHERE id = ?; SELECT * FROM " <> toTable <> " WHERE id = ? LIMIT 1;"
         )
-        ((tail . toRow $ row) <> [head . toRow $ row]) :: IO [row])
+        ((tail . toRow $ row) <> [head (toRow row), head (toRow row)]) :: IO [returnedRow])
 {-# INLINABLE updateOneByIdSoftDeleteInclusive #-}
 
 hardDeleteById ∷ (ToField id, MonadIO m) ⇒ Connection → TableName → id → m ()
