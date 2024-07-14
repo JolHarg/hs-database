@@ -2,6 +2,7 @@
 {-# LANGUAGE OverloadedStrings   #-}
 {-# LANGUAGE RankNTypes          #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# OPTIONS_GHC -Wno-x-partial #-}
 
 module DB.SQLite where
 
@@ -51,11 +52,11 @@ getFields ∷ Data a ⇒ a → [Text]
 getFields = fmap T.pack . constrFields . toConstr
 {-# INLINABLE getFields #-}
 
-getOneByIdSoftDeletedExclusive ∷ (FromRow row, ToField id, MonadIO m) ⇒ Connection → TableName → Text → id → m (Maybe row)
+getOneByIdSoftDeletedExclusive ∷ (FromRow row, ToField identifier, MonadIO m) ⇒ Connection → TableName → Text → identifier → m (Maybe row)
 getOneByIdSoftDeletedExclusive conn' table deletedAtField = getOneByFieldSoftDeletedExclusive conn' table deletedAtField "id"
 {-# INLINABLE getOneByIdSoftDeletedExclusive #-}
 
-getOneByIdSoftDeletedInclusive ∷ (FromRow row, ToField id, MonadIO m) ⇒ Connection → TableName → id → m (Maybe row)
+getOneByIdSoftDeletedInclusive ∷ (FromRow row, ToField identifier, MonadIO m) ⇒ Connection → TableName → identifier → m (Maybe row)
 getOneByIdSoftDeletedInclusive conn' table = getOneByFieldSoftDeletedInclusive conn' table "id"
 {-# INLINABLE getOneByIdSoftDeletedInclusive #-}
 
@@ -188,7 +189,7 @@ updateOneByIdSoftDeleteInclusive conn' table toTable row = listToMaybe <$> liftI
         ((tail . toRow $ row) <> [head (toRow row), head (toRow row)]) :: IO [returnedRow])
 {-# INLINABLE updateOneByIdSoftDeleteInclusive #-}
 
-hardDeleteById ∷ (ToField id, MonadIO m) ⇒ Connection → TableName → id → m ()
+hardDeleteById ∷ (ToField identifier, MonadIO m) ⇒ Connection → TableName → identifier → m ()
 hardDeleteById conn' table id' = liftIO $ execute conn' (SQLite.Query $ "DELETE FROM " <> table <> " WHERE id = ?") (Only id')
 {-# INLINABLE hardDeleteById #-}
 
@@ -204,7 +205,7 @@ hardDeleteAllByFields conn' table fields' = liftIO .
     ) $ M.elems fields'
 {-# INLINABLE hardDeleteAllByFields #-}
 
-softDeleteById ∷ (ToField id, MonadIO m) ⇒ Connection → TableName → Text → id → m ()
+softDeleteById ∷ (ToField identifier, MonadIO m) ⇒ Connection → TableName → Text → identifier → m ()
 softDeleteById conn' table deletedAtField id' = liftIO $
     execute conn' (SQLite.Query $ "UPDATE " <> table <> " SET " <> deletedAtField  <> " = DATETIME('NOW') WHERE id = ?") (Only id')
 {-# INLINABLE softDeleteById #-}

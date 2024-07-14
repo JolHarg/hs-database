@@ -39,8 +39,11 @@ library
     -Wall -Werror -Weverything -Wno-unsafe -Wno-safe
     -Wno-missing-import-lists -Wno-missing-export-lists
     -Wno-implicit-prelude -Wno-missing-safe-haskell-mode
-    -Wno-missing-kind-signatures -Wno-missing-local-signatures
-    -Wno-all-missed-specialisations -Wno-missed-specialisations
+    -Wno-missing-kind-signatures -Wno-missing-poly-kind-signatures
+    -Wno-missing-local-signatures -Wno-all-missed-specialisations
+    -Wno-missed-specialisations -Wno-missing-role-annotations
+    -Wno-missing-kind-signatures -Wno-missing-poly-kind-signatures
+    -Wno-unrecognised-warning-flags -Wno-missed-specialisations
 
 test-suite jolharg-database-test
   hs-source-dirs:     test
@@ -59,7 +62,10 @@ test-suite jolharg-database-test
     -Wno-unsafe -Wno-safe -Wno-missing-import-lists
     -Wno-missing-export-lists -Wno-implicit-prelude
     -Wno-missing-safe-haskell-mode -Wno-missing-kind-signatures
-    -Wno-missing-local-signatures -Wno-all-missed-specialisations -Wno-missed-specialisations
+    -Wno-missing-poly-kind-signatures -Wno-missing-local-signatures
+    -Wno-all-missed-specialisations -Wno-missed-specialisations
+    -Wno-missing-role-annotations -Wno-unrecognised-warning-flags
+    -Wno-missed-specialisations
 
   build-depends:
     , base   >=4.12 && <5
