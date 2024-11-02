@@ -1,7 +1,4 @@
-{-# LANGUAGE DataKinds          #-}
 {-# LANGUAGE DerivingVia        #-}
-{-# LANGUAGE NamedFieldPuns     #-}
-{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TemplateHaskell    #-}
 
 module DB.Instances.TH where

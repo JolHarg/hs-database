@@ -1,5 +1,3 @@
-{-# LANGUAGE RankNTypes          #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 {-# OPTIONS_GHC -Wno-x-partial #-}
 
 import Control.Monad.IO.Class
