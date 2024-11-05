@@ -51,6 +51,7 @@ test-suite jolharg-database-test
     NoGeneralisedNewtypeDeriving
     OverloadedStrings
     UnicodeSyntax
+
   main-is:            Spec.hs
   ghc-options:
     -Wall -Werror -threaded -rtsopts -with-rtsopts=-N -Weverything
@@ -61,9 +62,11 @@ test-suite jolharg-database-test
     -Wno-all-missed-specialisations -Wno-missed-specialisations
     -Wno-missing-role-annotations -Wno-unrecognised-warning-flags
     -Wno-missed-specialisations
+
   build-depends:
     , base   >=4.20.0.0 && <5
     , hspec
+
   -- , jolharg-database
   -- , hspec-core
   -- , hspec-expectations

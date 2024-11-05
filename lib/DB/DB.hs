@@ -1,8 +1,8 @@
 {-# OPTIONS_GHC -Wno-x-partial #-}
 
 import Control.Monad.IO.Class
-import Data.Map                       qualified as M
-import Data.Map.Strict                (Map)
+import Data.Map               qualified as M
+import Data.Map.Strict        (Map)
 
 type TableName = Text
 
