@@ -10,6 +10,7 @@ import Data.Map                       qualified as M
 import Data.Map.Strict                (Map)
 import Data.Maybe                     (listToMaybe)
 import Data.Text                      as T (Text, intercalate, pack)
+import Data.Traversable
 import Database.SQLite.Simple         qualified as SQLite
 import Database.SQLite.Simple.ToField qualified as SQLite
 
@@ -155,7 +156,7 @@ insertOne conn' table toTable row = fmap head <$> liftIO $
 {-# INLINABLE insertOne #-}
 
 insertMany ∷ (SQLite.ToRow row, Data row, SQLite.FromRow returnedRow, MonadIO m) ⇒ SQLite.Connection → TableName → TableName → [row] → m [returnedRow]
-insertMany conn' table toTable = mapM (insertOne conn' table toTable)
+insertMany conn' table toTable = traverse (insertOne conn' table toTable)
 {-# INLINABLE insertMany #-}
 
 -- @TODO If soft deleted - when updating appendthe unique keys with "_SOFT_DELETED_TIMESTAMP_" ?
