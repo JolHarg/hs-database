@@ -10,7 +10,6 @@ import Data.Map                       qualified as M
 import Data.Map.Strict                (Map)
 import Data.Maybe                     (listToMaybe)
 import Data.Text                      as T (Text, intercalate, pack)
-import Data.Traversable
 import Database.SQLite.Simple         qualified as SQLite
 import Database.SQLite.Simple.ToField qualified as SQLite
 
