@@ -1,10 +1,9 @@
-cabal-version:      3.4
+cabal-version:      3.12
 name:               jolharg-database
 version:            0.2.0.0
 license:            AGPL-3.0-only
 author:             Dan Dart
 maintainer:         git@dandart.co.uk
-
 -- copyright:
 -- category:
 build-type:         Simple
@@ -16,16 +15,14 @@ library
   exposed-modules:
     DB.Instances.TH
     DB.SQLite
-
   -- other-extensions:
   build-depends:
-    , base              ^>=4.20.0.0
-    , containers        ^>=0.7
+    , base              ^>=4.21.0.0
+    , containers        ^>=0.8
     , jolharg-models    ^>=0.2.0.0
     , sqlite-simple     ^>=0.4.19.0
-    , template-haskell  ^>=2.22.0
+    , template-haskell  ^>=2.23.0
     , text              ^>=2.1.2
-
   -- for ghc 9.10.1
   hs-source-dirs:     lib
   default-language:   GHC2024
@@ -45,6 +42,8 @@ library
     -Wno-unrecognised-warning-flags -Wno-missed-specialisations
 
 test-suite jolharg-database-test
+  if arch(javascript) || arch(wasm32)
+    buildable: False
   hs-source-dirs:     test
   type:               exitcode-stdio-1.0
   default-language:   GHC2024
@@ -52,10 +51,11 @@ test-suite jolharg-database-test
     NoGeneralisedNewtypeDeriving
     OverloadedStrings
     UnicodeSyntax
-
   main-is:            Spec.hs
+  if !arch(wasm32)
+    ghc-options: -threaded -rtsopts -with-rtsopts=-N 
   ghc-options:
-    -Wall -Werror -threaded -rtsopts -with-rtsopts=-N -Weverything
+    -Wall -Werror -Weverything
     -Wno-unsafe -Wno-safe -Wno-missing-import-lists
     -Wno-missing-export-lists -Wno-implicit-prelude
     -Wno-missing-safe-haskell-mode -Wno-missing-kind-signatures
@@ -65,9 +65,8 @@ test-suite jolharg-database-test
     -Wno-missed-specialisations
 
   build-depends:
-    , base   ^>=4.20.0.0
+    , base   ^>=4.21.0.0
     , hspec  ^>=2.11.10
-
   -- , jolharg-database
   -- , hspec-core ^>=2.11.10
   -- , hspec-expectations ^>=0.8.4
