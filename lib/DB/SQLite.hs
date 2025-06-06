@@ -136,8 +136,8 @@ getAllByFieldsSoftDeletedInclusive conn' table fields' = liftIO . SQLite.query c
 -- todo upsert?
 
 insertOne ∷ forall m row returnedRow. (Data row, SQLite.ToRow row, SQLite.FromRow returnedRow, MonadIO m) ⇒ SQLite.Connection → TableName → TableName → row → m returnedRow
-insertOne conn' table toTable row = fmap head <$> liftIO $
-    (SQLite.query conn' (
+insertOne conn' table toTable row = fmap (\case { x : _ -> x; _ -> error "No returned row. Check query!" }) <$> liftIO $ do
+    SQLite.execute conn' (
         SQLite.Query $
             "INSERT INTO " <>
             table <>
@@ -150,8 +150,16 @@ insertOne conn' table toTable row = fmap head <$> liftIO $
                 -- Currently, the table columns have to be in the same order as the rows in the datatype.
                 "?" <$ getFields row
             ) <>
-            "); SELECT * FROM `" <> toTable <> "` WHERE id = LAST_INSERT_ROWID() LIMIT 1;"
-        ) $ SQLite.toRow row :: IO [returnedRow])
+            ");"
+        ) $ SQLite.toRow row
+    SQLite.query conn' (
+        SQLite.Query $
+            "SELECT * FROM `" <>
+            toTable <>
+            "` WHERE id = (select id FROM " <>
+            table <>
+            " WHERE rowid = LAST_INSERT_ROWID() LIMIT 1);"
+        ) ()
 {-# INLINABLE insertOne #-}
 
 insertMany ∷ (SQLite.ToRow row, Data row, SQLite.FromRow returnedRow, MonadIO m) ⇒ SQLite.Connection → TableName → TableName → [row] → m [returnedRow]
@@ -173,10 +181,16 @@ updateOneByIdSoftDeleteExclusive conn' table toTable deletedAtField row = listTo
             table <>
             " SET " <>
             T.intercalate "," (
-                (<> " = ?") <$> tail (getFields row) -- everything but id
+                (<> " = ?") <$> (case getFields row of
+                    _ : xs -> xs
+                    []     -> error "No fields other than id!") -- everything but id
             ) <> " WHERE id = ? AND " <> deletedAtField <> " IS NULL; SELECT * FROM " <> toTable <> " WHERE id = ? LIMIT 1;"
         )
-        ((tail . SQLite.toRow $ row) <> [head (SQLite.toRow row), head (SQLite.toRow row)]) :: IO [returnedRow])
+        ((drop 1 . SQLite.toRow $ row) <> [case SQLite.toRow row of
+    x : _ -> x
+    []    -> error "No fields other than id!", case SQLite.toRow row of
+    x : _ -> x
+    []    -> error "No fields other than id!"]) :: IO [returnedRow])
 {-# INLINABLE updateOneByIdSoftDeleteExclusive #-}
 
 updateOneByIdSoftDeleteInclusive ∷ forall m row returnedRow. (SQLite.FromRow returnedRow, SQLite.ToRow row, Data row, MonadIO m) ⇒ SQLite.Connection → TableName → TableName → row → m (Maybe returnedRow)
@@ -187,10 +201,16 @@ updateOneByIdSoftDeleteInclusive conn' table toTable row = listToMaybe <$> liftI
             table <>
             " SET " <>
             T.intercalate "," (
-                (<> " = ?") <$> tail (getFields row) -- everything but id
+                (<> " = ?") <$> (case getFields row of
+                    _ : xs -> xs
+                    []     -> error "No fields other than id!") -- everything but id
             ) <> " WHERE id = ?; SELECT * FROM " <> toTable <> " WHERE id = ? LIMIT 1;"
         )
-        ((tail . SQLite.toRow $ row) <> [head (SQLite.toRow row), head (SQLite.toRow row)]) :: IO [returnedRow])
+        ((drop 1 . SQLite.toRow $ row) <> [case SQLite.toRow row of
+    x : _ -> x
+    []    -> error "No fields other than id!", case SQLite.toRow row of
+    x : _ -> x
+    []    -> error "No fields other than id!"]) :: IO [returnedRow])
 {-# INLINABLE updateOneByIdSoftDeleteInclusive #-}
 
 hardDeleteById ∷ (SQLite.ToField identifier, MonadIO m) ⇒ SQLite.Connection → TableName → identifier → m ()
