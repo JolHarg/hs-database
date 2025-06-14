@@ -12,6 +12,7 @@ import Data.Maybe                     (listToMaybe)
 import Data.Text                      as T (Text, intercalate, pack)
 import Database.SQLite.Simple         qualified as SQLite
 import Database.SQLite.Simple.ToField qualified as SQLite
+import GHC.Stack
 
 type TableName = Text
 
@@ -135,7 +136,7 @@ getAllByFieldsSoftDeletedInclusive conn' table fields' = liftIO . SQLite.query c
 
 -- todo upsert?
 
-insertOne ∷ forall m row returnedRow. (Data row, SQLite.ToRow row, SQLite.FromRow returnedRow, MonadIO m) ⇒ SQLite.Connection → TableName → TableName → row → m returnedRow
+insertOne ∷ forall m row returnedRow. (Data row, SQLite.ToRow row, SQLite.FromRow returnedRow, MonadIO m, HasCallStack) ⇒ SQLite.Connection → TableName → TableName → row → m returnedRow
 insertOne conn' table toTable row = fmap (\case { x : _ -> x; _ -> error "No returned row. Check query!" }) <$> liftIO $ do
     SQLite.execute conn' (
         SQLite.Query $
@@ -173,7 +174,7 @@ insertMany conn' table toTable = traverse (insertOne conn' table toTable)
 -- TODO ignore ID?
 -- update all by field, update all by fields
 
-updateOneByIdSoftDeleteExclusive ∷ forall m row returnedRow. (SQLite.FromRow returnedRow, SQLite.ToRow row, Data row, MonadIO m) ⇒ SQLite.Connection → TableName → TableName → Text → row → m (Maybe returnedRow)
+updateOneByIdSoftDeleteExclusive ∷ forall m row returnedRow. (SQLite.FromRow returnedRow, SQLite.ToRow row, Data row, MonadIO m, HasCallStack) ⇒ SQLite.Connection → TableName → TableName → Text → row → m (Maybe returnedRow)
 updateOneByIdSoftDeleteExclusive conn' table toTable deletedAtField row = listToMaybe <$> liftIO (
     SQLite.query conn' (
         SQLite.Query $
@@ -193,7 +194,7 @@ updateOneByIdSoftDeleteExclusive conn' table toTable deletedAtField row = listTo
     []    -> error "No fields other than id!"]) :: IO [returnedRow])
 {-# INLINABLE updateOneByIdSoftDeleteExclusive #-}
 
-updateOneByIdSoftDeleteInclusive ∷ forall m row returnedRow. (SQLite.FromRow returnedRow, SQLite.ToRow row, Data row, MonadIO m) ⇒ SQLite.Connection → TableName → TableName → row → m (Maybe returnedRow)
+updateOneByIdSoftDeleteInclusive ∷ forall m row returnedRow. (SQLite.FromRow returnedRow, SQLite.ToRow row, Data row, MonadIO m, HasCallStack) ⇒ SQLite.Connection → TableName → TableName → row → m (Maybe returnedRow)
 updateOneByIdSoftDeleteInclusive conn' table toTable row = listToMaybe <$> liftIO (
     SQLite.query conn' (
         SQLite.Query $
