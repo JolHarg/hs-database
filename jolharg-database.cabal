@@ -1,9 +1,10 @@
 cabal-version:      3.12
 name:               jolharg-database
-version:            0.2.0.0
+version:            0.3.0.0
 license:            AGPL-3.0-only
 author:             Dan Dart
 maintainer:         git@dandart.co.uk
+
 -- copyright:
 -- category:
 build-type:         Simple
@@ -15,14 +16,16 @@ library
   exposed-modules:
     DB.Instances.TH
     DB.SQLite
+
   -- other-extensions:
   build-depends:
     , base              ^>=4.21.0.0
     , containers        ^>=0.8
-    , jolharg-models    ^>=0.2.0.0
+    , jolharg-models    ^>=0.3.0.0
     , sqlite-simple     ^>=0.4.19.0
     , template-haskell  ^>=2.23.0
     , text              ^>=2.1.2
+
   -- for ghc 9.10.1
   hs-source-dirs:     lib
   default-language:   GHC2024
@@ -42,8 +45,9 @@ library
     -Wno-unrecognised-warning-flags -Wno-missed-specialisations
 
 test-suite jolharg-database-test
-  if arch(javascript) || arch(wasm32)
+  if (arch(javascript) || arch(wasm32))
     buildable: False
+
   hs-source-dirs:     test
   type:               exitcode-stdio-1.0
   default-language:   GHC2024
@@ -51,26 +55,29 @@ test-suite jolharg-database-test
     NoGeneralisedNewtypeDeriving
     OverloadedStrings
     UnicodeSyntax
+
   main-is:            Spec.hs
+
   if !arch(wasm32)
-    ghc-options: -threaded -rtsopts -with-rtsopts=-N 
+    ghc-options: -threaded -rtsopts -with-rtsopts=-N
+
   ghc-options:
-    -Wall -Werror -Weverything
-    -Wno-unsafe -Wno-safe -Wno-missing-import-lists
-    -Wno-missing-export-lists -Wno-implicit-prelude
-    -Wno-missing-safe-haskell-mode -Wno-missing-kind-signatures
-    -Wno-missing-poly-kind-signatures -Wno-missing-local-signatures
-    -Wno-all-missed-specialisations -Wno-missed-specialisations
-    -Wno-missing-role-annotations -Wno-unrecognised-warning-flags
-    -Wno-missed-specialisations
+    -Wall -Werror -Weverything -Wno-unsafe -Wno-safe
+    -Wno-missing-import-lists -Wno-missing-export-lists
+    -Wno-implicit-prelude -Wno-missing-safe-haskell-mode
+    -Wno-missing-kind-signatures -Wno-missing-poly-kind-signatures
+    -Wno-missing-local-signatures -Wno-all-missed-specialisations
+    -Wno-missed-specialisations -Wno-missing-role-annotations
+    -Wno-unrecognised-warning-flags -Wno-missed-specialisations
 
   build-depends:
     , base   ^>=4.21.0.0
     , hspec  ^>=2.11.10
+
   -- , jolharg-database
   -- , hspec-core ^>=2.11.10
   -- , hspec-expectations ^>=0.8.4
   -- , HUnit
-  -- , QuickCheck ^>=2.15.0.1
+  -- , QuickCheck ^>=2.16.0.0
   build-tool-depends: hspec-discover:hspec-discover
   other-modules:      MainSpec
