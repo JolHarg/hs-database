@@ -19,11 +19,11 @@ library
 
   -- other-extensions:
   build-depends:
-    , base              >=4.21.0.0 && <4.23.0.0
+    , base              >=4.21 && <4.23
     , containers        ^>=0.8
-    , jolharg-models    ^>=0.3.0.0
-    , sqlite-simple     ^>=0.4.19.0
-    , template-haskell  >=2.23.0 && <2.25
+    , jolharg-models    ^>=0.3
+    , sqlite-simple     ^>=0.4.19
+    , template-haskell  >=2.23 && <2.25
     , text              ^>=2.1.2
 
   -- for ghc 9.10.1
@@ -71,13 +71,13 @@ test-suite jolharg-database-test
     -Wno-unrecognised-warning-flags -Wno-missed-specialisations
 
   build-depends:
-    , base   >=4.21.0.0 && <4.23.0.0
-    , hspec  ^>=2.11.10
+    , base   >=4.21 && <4.23
+    , hspec  ^>=2.11.15
 
   -- , jolharg-database
-  -- , hspec-core ^>=2.11.10
+  -- , hspec-core ^>=2.11.15
   -- , hspec-expectations ^>=0.8.4
   -- , HUnit
-  -- , QuickCheck ^>=2.17.0.0
+  -- , QuickCheck ^>=2.17
   build-tool-depends: hspec-discover:hspec-discover
   other-modules:      MainSpec
