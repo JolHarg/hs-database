@@ -19,7 +19,7 @@ library
 
   -- other-extensions:
   build-depends:
-    , base              >=4.21 && <4.23
+    , base              ^>=4.22
     , containers        ^>=0.8
     , jolharg-models    ^>=0.3
     , sqlite-simple     ^>=0.4.19
@@ -71,7 +71,7 @@ test-suite jolharg-database-test
     -Wno-unrecognised-warning-flags -Wno-missed-specialisations
 
   build-depends:
-    , base   >=4.21 && <4.23
+    , base   ^>=4.22
     , hspec  ^>=2.11.15
 
   -- , jolharg-database
