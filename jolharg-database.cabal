@@ -2,8 +2,8 @@ cabal-version:      3.14
 name:               jolharg-database
 version:            0.3.0.0
 license:            AGPL-3.0-only
-author:             Dan Dart
-maintainer:         cabal@dandart.co.uk
+author:             Ember Dart
+maintainer:         cabal@emberdart.co.uk
 
 -- copyright:
 -- category:
@@ -23,7 +23,7 @@ library
     , containers        ^>=0.8
     , jolharg-models    ^>=0.3
     , sqlite-simple     ^>=0.4.19
-    , template-haskell  >=2.23 && <2.25
+    -- , template-haskell  >=2.23 && <2.25
     , text              ^>=2.1.2
 
   -- for ghc 9.10.1
